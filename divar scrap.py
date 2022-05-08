@@ -9,18 +9,29 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import chromedriver_binary
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 
+
+
+options = Options()
+options.add_argument("start-maximized")
+options.add_argument('--ignore-certificate-errors')
+options.add_argument('--ignore-ssl-errors')
+options.add_argument('log-level=3')
+options.add_argument("headless");
 
 # variables
 url = 'https://divar.ir/s/tehran/refrigerator-freezer/like-new?status=used%2Crepair-needed&has-photo=true&non-negotiable=true&exchange=exclude-exchanges'
-s = Service('c:/webdrivers/Chromedriver.exe')
-driver = webdriver.Chrome(service=s)
+
+driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+
 # You can set your own pause time. My laptop is a bit slow so I use 1 sec
 scroll_pause_time = 1
 screen_height = driver.execute_script("return window.screen.height;")   # get the screen height of the web
 i = 1
 data = []
-rawdata = []
 
 
 driver.maximize_window()
@@ -31,8 +42,6 @@ timeout = 5
 while True:
 
     products = driver.find_elements(by=By.XPATH, value="//div[@class='post-card-item kt-col-6 kt-col-xxl-4'] ")
-    # rawdata.extend(products)
-    # print(len(rawdata))
     for x in products:
         purl = x.find_element(By.CSS_SELECTOR, value="a.kt-post-card").get_attribute("href")
         pname = x.find_element(By.CSS_SELECTOR, value="div.kt-post-card__title",).text
@@ -64,7 +73,7 @@ while True:
     scroll_height = driver.execute_script("return document.body.scrollHeight;")
 
     print(len(data))
-    if len(data) >= 30: ######### input data length ############### 
+    if len(data) >= 200: ######### input data length ############### 
         driver.close()
         break
 
