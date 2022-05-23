@@ -9,7 +9,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import chromedriver_binary
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
@@ -20,7 +19,7 @@ options.add_argument("start-maximized")
 options.add_argument('--ignore-certificate-errors')
 options.add_argument('--ignore-ssl-errors')
 options.add_argument('log-level=3')
-options.add_argument("headless");
+options.add_argument("headless")
 
 # variables
 url = 'https://divar.ir/s/tehran/refrigerator-freezer/like-new?status=used%2Crepair-needed&has-photo=true&non-negotiable=true&exchange=exclude-exchanges'
@@ -36,7 +35,7 @@ data = []
 
 driver.maximize_window()
 driver.get(url)
-timeout = 5
+time.sleep(5)
 
 
 while True:
@@ -48,19 +47,20 @@ while True:
         price = x.find_element(By.CSS_SELECTOR, value="div.kt-post-card__description").text
         location = x.find_element(By.CSS_SELECTOR, value="span.kt-post-card__bottom-description").text
         soup = BeautifulSoup(requests.get(purl).content, "html.parser")
-        pdesc = soup.find("p" ,class_="kt-description-row__text").text
-        imgurl1 = soup.find('meta' , attrs={"property" : "og:image"})['content'].replace("webp", "jpg")
+        try:
+         imgurl1 = soup.find('meta' , attrs={"property" : "og:image"})['content'].replace("webp", "jpg")
+        except: continue
         imgurl2 = imgurl1.replace(".jpg", ".1.jpg")
-        if [purl, pname, price, pdesc, location, imgurl1, imgurl2] not in data:
-            data.append([purl, pname, price, pdesc, location, imgurl1, imgurl2])   
+        
+        if [purl,pname, price, location, imgurl1, imgurl2] not in data:
+            data.append([purl, pname, price, location, imgurl1, imgurl2])
             filename1 = wget.download(imgurl1, out="./images")
             try:
-                
                 filename2 = wget.download(imgurl2, out="./images")
             except:
                 pass
-                    
-            
+
+
         else:
             continue
 
@@ -73,10 +73,10 @@ while True:
     scroll_height = driver.execute_script("return document.body.scrollHeight;")
 
     print(len(data))
-    if len(data) >= 200: ######### input data length ############### 
+    if len(data) >= 200: ######### input data length ###############
         driver.close()
         break
 
 
-df = pd.DataFrame(data, columns=['Product URL', 'Name', 'Price', 'Description', 'Location', 'Img URL1', 'Img URL2'])
+df = pd.DataFrame(data, columns=['Product URL', 'Name', 'Price', 'Location', 'Img URL1', 'Img URL2'])
 df.to_excel("example.xlsx")
