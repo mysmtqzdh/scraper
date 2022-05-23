@@ -53,8 +53,10 @@ while True:
         imgurl2 = imgurl1.replace(".jpg", ".1.jpg")
         
         if [purl,pname, price, location, imgurl1, imgurl2] not in data:
+            try:
+                filename1 = wget.download(imgurl1, out="./images")
+            except: continue
             data.append([purl, pname, price, location, imgurl1, imgurl2])
-            filename1 = wget.download(imgurl1, out="./images")
             try:
                 filename2 = wget.download(imgurl2, out="./images")
             except:
